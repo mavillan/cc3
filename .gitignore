@@ -1,0 +1,6 @@
+*.pdf
+*.zip
+*.pyc
+*.tar.gz
+~fass/
+topic1/

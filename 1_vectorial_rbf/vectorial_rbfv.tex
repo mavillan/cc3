@@ -1,0 +1,448 @@
+  \documentclass{beamer}
+
+% Used packages
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amssymb, amsmath, amsthm, amsfonts, esint, mathtools}
+
+
+
+
+% There are many different themes available for Beamer. A comprehensive
+% list with examples is given here:
+% http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
+% You can uncomment the themes below if you would like to use a different
+% one:
+%\usetheme{AnnArbor}
+\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{boxes}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{default}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+%\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+\title{Interpolación de campos vectoriales sin divergencia}
+
+% A subtitle is optional and this may be deleted
+\subtitle{Aplicaciones de RBF}
+
+\author{Martín Villanueva\inst{1}}
+% - Give the names in the same order as the appear in the paper.
+% - Use the \inst{?} command only if the authors have different
+%   affiliation.
+
+\institute[Universidad Técnica Federico Santa María] % (optional, but mostly needed)
+{
+  \inst{1}%
+  Departamento de Informática\\
+  Universidad Técnica Federico Santa María}
+% - Use the \inst command only if there are several affiliations.
+% - Keep it simple, no one is interested in your street address.
+
+\date{Seminario de modelos y métodos cuantitativos, 2015}
+% - Either use conference name or its abbreviation.
+% - Not really informative to the audience, more for people (including
+%   yourself) who are reading the slides online
+
+%\subject{Theoretical Computer Science}
+% This is only inserted into the PDF information catalog. Can be left
+% out.
+
+% If you have a file called "university-logo-filename.xxx", where xxx
+% is a graphic format that can be processed by latex or pdflatex,
+% resp., then you can add a logo as follows:
+
+% \pgfdeclareimage[height=0.5cm]{university-logo}{university-logo-filename}
+% \logo{\pgfuseimage{university-logo}}
+
+% Delete this, if you do not want the table of contents to pop up at
+% the beginning of each subsection:
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>{Outline}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+
+% Let's get started
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+
+\begin{frame}{Outline}
+  \tableofcontents
+  % You might wish to add the option [pausesections]
+\end{frame}
+
+
+
+
+% Section and subsections will appear in the presentation overview
+% and table of contents.
+\section{Preliminares}
+\subsection{Campos vectoriales}
+
+\begin{frame}{Definición de campo vectorial}
+ 
+  \begin{definition}
+    Un campo vectorial es una función $S:\mathbb{R}^n \rightarrow \mathbb{R}^m$, tal que
+    $S(\mathbf{x})=(s_1(\mathbf{x}),\ldots,s_m(\mathbf{x}))$, donde $s_i: \mathbb{R}^n \rightarrow \mathbb{R}$
+    son campos escalares.
+  \end{definition}
+
+  \begin{itemize}
+  \item {
+    Coloquialmente hablando, un campo vectorial $S:\mathbb{R}^n \rightarrow \mathbb{R}^m$, es una función
+    que asigna a cada punto en $\mathbb{R}^n$, un único vector en el espacio $\mathbb{R}^m$
+  }
+  \end{itemize}
+\end{frame}
+
+\subsection{Divergencia}
+
+
+\begin{frame}{Divergencia}
+  \begin{definition}
+    Sea $\mathbf{F}$ un campo vectorial, se define la divergencia en un punto $\mathbf{x_0}$ del espacio como
+    $$
+    \text{div }\mathbf{F}(\mathbf{x_0}) =
+    \lim_{V \rightarrow \{\mathbf{x}_0\}} \frac{1}{V} \oiint_{\partial V} \mathbf{F} \cdot \mathbf{n} \ dS
+    $$
+    Donde $V$ es el volumen que contiene el punto, $\partial V$ es la supercie continua y cerrada que encierra
+    tal volumen y $\mathbf{n}$ un vector unitario, normal (y saliente) a $\partial V$ en cada punto
+  \end{definition}
+
+  \begin{itemize}
+  \item {
+    La divergencia de un campo vectorial en un punto, representa la densidad volumétrica de flujo saliente a través de
+    una superficie que encierra el volumen infinitesimal en el cual se encuentra tal punto.
+  }
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Divergencia}
+ 
+  \begin{definition}
+    Alternativamente, la divergencia de un campo $\mathbf{F}:\mathbb{R}^n \rightarrow \mathbb{R}^m$ se puede representar
+    como:
+    $$ \nabla \cdot \mathbf{F} =
+    \nabla \cdot (F_1,\ \ldots \ ,F_m)=
+    \frac{\partial F_1}{\partial x_1} + \ldots + \frac{\partial F_m}{\partial x_m} $$
+  \end{definition}
+
+  \begin{itemize}
+  \item {
+    El operador diferencial nabla se define $\nabla=(\frac{\partial}{\partial x_1}, \ \ldots \ , \frac{\partial}{\partial x_n})$
+  }
+
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Campos libres de divergencia}
+  \begin{definition}
+    Un campo $\mathbf{F}:\mathbb{R}^n \rightarrow \mathbb{R}^m$ se dice libre de divergencia, si para todo punto
+    en $\mathbb{R}^n$ se cumple que:
+    $$ \nabla \cdot \mathbf{F} = 0$$  
+  \end{definition}
+
+  \begin{itemize}
+  \item {
+    Intuitivamente, los campos libres de divergencia son aquellos en donde el flujo entrante en cada $\partial S$ que rodea un punto, es igual al flujo que sale.
+  }
+  \item {
+    Se puede extender esta idea, enunciando que el flujo neto sobre una superficie cerrada en un campo libre de divergencia es cero (Teorema de Gauss).
+  }
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Linealidad}
+  \begin{theorem}
+  Sean $\mathbf{F},\mathbf{G}:\mathbb{R}^n \rightarrow \mathbb{R}^m$  dos campos vectoriales libres de divergencia, entonces
+  su combinación lineal $\alpha \mathbf{F} + \beta \mathbf{G}$ (con $\alpha \text{ y } \beta$ escalares) también lo es.
+  \end{theorem}
+
+  \begin{itemize}
+  \item {
+    Esta propiedad de los campos sin divergencia, es fundamental para uno de los enfoques del problema que se plantea a continuación.
+  }
+  \end{itemize}
+\end{frame}
+
+
+
+\section{Problema planteado}
+
+\begin{frame}{Definición del problema}
+ 
+  \begin{block}{Problema}
+    El problema consiste en dado un conjunto de datos dispersos $D=\{\mathbf{x}_j, \mathbf{d}_j \}_{j=1 \ldots N}$ con $\mathbf{x}_j=(x_j,y_j)$ y $\mathbf{d}_j = (d_{1j},d_{2j})$ (ambos en $\mathbb{R}^2$), encontrar un campo vectorial $\mathbf{S}$ \textit{libre de divergencia} tal que
+
+    $$ \mathbf{S}(\mathbf{x}_j)=
+    \begin{pmatrix} u(\mathbf{x}_j)\\v(\mathbf{x}_j)\end{pmatrix}=
+    \begin{pmatrix} d_{1j} \\ d_{2j} \end{pmatrix}=
+    \mathbf{d}_j
+     $$
+  \end{block}
+
+  \begin{itemize}
+  \item {
+    Si no existiese la restricción de que $\mathbf{S}$ deba ser libre de divergencia, el problema se convierte simplemente
+    en dividir los datos en $D_1=\{\mathbf{x}_j, d_{1j} \}_{j=1:N}$ y $D_2=\{\mathbf{x}_j, d_{2j} \}_{j=1:N}$ y
+    determinar dos funciones escalares $u(\mathbf{x})$ y $v(\mathbf{x})$ que interpolan cada conjunto.
+  }
+  \end{itemize}
+\end{frame}
+
+
+
+
+\section{Soluciones Propuestas}
+
+\subsection{Primer Enfoque}
+
+\begin{frame}{Interpolar independientemente}
+  \begin{itemize}
+    \item{
+      Esta solución consiste básicamente en hacer lo que se sugiere anteriormente; Particionar el conjunto inicial de datos $D$ en $D_1$ y $D_2$, y hallar dos funciones \textit{escalares} $u(\mathbf{x})$ y $v(\mathbf{x})$ que interpolan independientemente a cada conjunto respectivamente, \textbf{forzando} que se cumpla $u_x + u_y = 0$.
+    }
+    \item{
+      \textbf{Problema:} Elegir dos bases funcionales (RBF) $\{B_k\}_{k=1:N}$ y ${\{\widetilde{B}_k\}_{k=1:N}}$ (no necesariamente la misma) tales que cualquier combinación lineal $u(\mathbf{x})=\sum \alpha_j B_j(\mathbf{x})$ y $v(\mathbf{x})=\sum \beta_j \widetilde{B}_j(\mathbf{x})$, cumplan con la restricción $u_x+v_y=0$ es un problema complejo.
+    }
+    \item{
+      Resolver tal problema, implica determinar bases funcionales tales que
+      $$\alpha_i \frac{\partial B_i}{\partial x} + \beta_j \frac{\partial \widetilde{B}_j}{\partial y} = 0 $$
+    }
+  \end{itemize}
+\end{frame}
+
+\subsection{Segundo Enfoque}
+
+\begin{frame}{Suma de campos libres de divergencia}
+
+\begin{block}{Solución propuesta}
+  Construir el campo vectorial $\mathbf{S}$ como una combinación lineal de funciones matriciales radiales  
+  $\mathbf{\Phi}_k(\mathbf{x})=\widetilde{\mathbf{\Phi}_k}(\mathbf{||\mathbf{x}-\mathbf{x}_k||})$ de la siguiente manera
+
+  $$ \mathbf{S}(\mathbf{x}) =
+  \begin{pmatrix} u(\mathbf{x})\\v(\mathbf{x})\end{pmatrix} =
+  \sum_{j=1}^{N} \mathbf{\Phi}_j(\mathbf{x}) \cdot \mathbf{c}_j
+  $$
+
+  donde $\mathbf{c}_j=\begin{pmatrix} c_{1j} \\ c_{2j} \end{pmatrix}$
+
+\end{block}
+\end{frame}
+
+\begin{frame}
+  \begin{block}{Solución propuesta (continuación)}
+    $\mathbf{\Phi}_j(\mathbf{x})$ se construye como sigue:
+
+    $$ \mathbf{\Phi}_j(\mathbf{x}) =
+    (\nabla \nabla^T - \nabla^2 I)\psi_j(\mathbf{x})=
+    \begin{pmatrix}
+    -\frac{\partial^2}{\partial y^2} & \frac{\partial^2}{\partial x \partial y} \\
+    \frac{\partial^2}{\partial y \partial x} & -\frac{\partial^2}{\partial x^2}
+    \end{pmatrix}\psi_j(\mathbf{x}) $$
+  \end{block}
+
+  y $\psi_j(\mathbf{x})$ es una RBF centrada en el punto $\mathbf{x}_j
+  $
+\end{frame}
+
+
+\begin{frame}{Suma de campos libres de divergencia}
+\begin{itemize}
+  \item A continuación se pasa a detallar, porqué la solución propuesta funciona
+\end{itemize}
+
+\begin{block}{Explicación}
+  Considerando la construcción anterior de $\mathbf{S}$, se puede reescribir como
+
+  $$
+  \mathbf{S}(\mathbf{x})=\sum_{j=1}^N
+  \begin{pmatrix}
+  \phi_{11_{j}} & \phi_{12_{j}} \\
+  \phi_{21_{j}} & \phi_{22_{j}}
+  \end{pmatrix} \cdot
+  \begin{pmatrix} c_{1j} \\ c_{2j} \end{pmatrix} =
+  \sum_{j=1}^N \Big(
+  c_{1j} \begin{pmatrix} \phi_{11_{j}} \\ \phi_{21_{j}} \end{pmatrix} +
+  c_{2j} \begin{pmatrix} \phi_{12_{j}} \\ \phi_{22_{j}} \end{pmatrix} \Big)
+  $$  
+\end{block}
+ 
+\end{frame}
+
+\begin{frame}{Suma de campos libres de divergencia}
+  \begin{block}{Explicación (continuación)}
+  donde:
+  $$
+  \mathbf{L}_j(\mathbf{x})=\begin{pmatrix} \phi_{11_{j}} \\ \phi_{21_{j}} \end{pmatrix} =
+  \begin{pmatrix} -\frac{\partial^2}{\partial y^2}\psi_{j}(\mathbf{x}) \\
+  \frac{\partial^2}{\partial y \partial x}  \psi_{j}(\mathbf{x}) \end{pmatrix}
+  $$
+  $$
+  \mathbf{R}_j(\mathbf{x})=\begin{pmatrix} \phi_{12_{j}} \\ \phi_{22_{j}} \end{pmatrix} =
+  \begin{pmatrix} \frac{\partial^2}{\partial x \partial y}  \psi_{j}(\mathbf{x})  \\
+  -\frac{\partial^2}{\partial x^2}\psi_{j}(\mathbf{x})
+   \end{pmatrix}
+  $$
+  Cada uno de estos vectores columna son en sí campos vectoriales y cumplen lo siguiente:
+  $$
+  \nabla \cdot \mathbf{L}_j =
+  -\frac{\partial^3}{\partial x \partial y^2} \psi_{j}(\mathbf{x}) + \frac{\partial^3}{\partial y^2 \partial x} \psi_{j}(\mathbf{x})
+  $$
+
+  \end{block}
+\end{frame}
+
+\begin{frame}{Suma de campos libres de divergencia}
+  \begin{block}{Explicación (continuación)}
+  $$
+  \nabla \cdot \mathbf{R}_j =
+  \frac{\partial^3}{\partial x^2 \partial y} \psi_{j}(\mathbf{x}) -\frac{\partial^3}{\partial y \partial x^2} \psi_{j}(\mathbf{x})
+  $$
+  luego si las funciones RBF $\psi_{j}(\mathbf{x})$ tienen segundas derivadas parciales continuas, por el teorema de Schwarz, no importa
+  el orden en que se evalúan las derivadas, y por lo tanto la divergencia de ambos campos es analíticamente $0$. Como
+  $\mathbf{S}(\mathbf{x})$ no es más que un combinación lineal de campos sin divergencia, entonces por construcción, también debe serlo.
+  \end{block}
+
+  \begin{itemize}
+    \item La mayoría de las RBF ocupadas tienen segundas derivadas parciales continuas!.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{example}
+    Veamos en la siguiente demostración que tal propiedad se cumple para algunas de las RBF más utilizadas...
+  \end{example}
+
+
+\end{frame}
+
+\begin{frame}{Planteamiento del sistema lineal}
+  \begin{itemize}
+  \item Al igual que con interpolación con RBF para campos escalares, se debe evaluar $\mathbf{S}(\mathbf{x})$ para los $N$ datos
+  y construir un sistema lineal a resolver.
+  \item Pese a que el campo vectorial de interpolación posee una forma distinta a la función de interpolación con RBF ``clásico", es posible
+  escribir la evaluación del campo interpolador para cada punto $\mathbf{x}_j$ de forma matricial, como se muestra a continuación.
+  \item \textbf{Notación:} $\phi_{11}^{\mathbf{x}_k}(\mathbf{x}_j)$ es la evaluación de la función $\phi_{11}$ que viene de la matriz
+  $\mathbf{\Phi}_{k}$ (centrada en el punto $\mathbf{x}_k$) y evaluada en el punto $\mathbf{x}_j$.
+\end{itemize}  
+\end{frame}
+
+
+\begin{frame}{Planteamiento del sistema lineal}
+
+  \begin{block}{Matriz de interpolación}
+  $$
+  \begin{pmatrix}
+  \phi_{11}^{\mathbf{x}_1}(\mathbf{x}_1) & \ldots & \phi_{11}^{\mathbf{x}_N}(\mathbf{x}_1) &
+  \phi_{12}^{\mathbf{x}_1}(\mathbf{x}_1) & \ldots & \phi_{12}^{\mathbf{x}_N}(\mathbf{x}_1) \\
+  \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+  \phi_{11}^{\mathbf{x}_1}(\mathbf{x}_N) & \ldots & \phi_{11}^{\mathbf{x}_N}(\mathbf{x}_N) &
+  \phi_{12}^{\mathbf{x}_1}(\mathbf{x}_N) & \ldots & \phi_{12}^{\mathbf{x}_N}(\mathbf{x}_N) \\
+  \phi_{21}^{\mathbf{x}_1}(\mathbf{x}_1) & \ldots & \phi_{21}^{\mathbf{x}_N}(\mathbf{x}_1) &
+  \phi_{22}^{\mathbf{x}_1}(\mathbf{x}_1) & \ldots & \phi_{22}^{\mathbf{x}_N}(\mathbf{x}_1) \\
+  \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+  \phi_{21}^{\mathbf{x}_1}(\mathbf{x}_N) & \ldots & \phi_{21}^{\mathbf{x}_N}(\mathbf{x}_N) &
+  \phi_{22}^{\mathbf{x}_1}(\mathbf{x}_N) & \ldots & \phi_{22}^{\mathbf{x}_N}(\mathbf{x}_N) \\
+  \end{pmatrix} \cdot
+  \begin{pmatrix}
+    c_{11} \\ \vdots \\ c_{1N} \\ c_{21} \\ \vdots \\ c_{2N}
+  \end{pmatrix} =
+  \begin{pmatrix}
+    d_{11} \\ \vdots \\ d_{1N} \\ d_{21} \\ \vdots \\ d_{2N}   
+  \end{pmatrix}
+  $$
+  \end{block}
+\end{frame}
+
+\begin{frame}{Planteamiento del sistema lineal}
+\begin{itemize}
+  \item La matriz de interpolación $A$ esta compuesta de las siguientes $4$ submatrices  
+\end{itemize}
+
+\begin{block}{Composición de la matriz de interpolación}
+  \begin{itemize}
+    \item $A_{11_{(i,j)}} = \phi_{11}^{\mathbf{x}_j}(\mathbf{x}_i)$ para $i=1:N$, $j:1:N$
+    \item $A_{12_{(i,j)}} = \phi_{12}^{\mathbf{x}_j}(\mathbf{x}_i)$ para $i=1:N$, $j:N+1:2N$
+    \item $A_{21_{(i,j)}} = \phi_{21}^{\mathbf{x}_j}(\mathbf{x}_i)$ para $i=N+1:2N$, $j:1:N$
+    \item $A_{22_{(i,j)}} = \phi_{22}^{\mathbf{x}_j}(\mathbf{x}_i)$ para $i=N+1:2N$, $j:N+1:2N$
+  \end{itemize}
+\end{block}
+ 
+\end{frame}
+
+
+% Placing a * after \section means it will not show in the
+% outline or table of contents.
+\section{Experimentación}
+
+\begin{frame}{Experimentación}
+ 
+\begin{example}
+  Veamos en la siguiente demostración la implementación de este método y los resultados que obtiene...
+\end{example}
+\end{frame}
+
+
+
+
+% All of the following is optional and typically not needed.
+% \appendix
+% \section<presentation>*{\appendixname}
+% \subsection<presentation>*{For Further Reading}
+
+% \begin{frame}[allowframebreaks]
+%   \frametitle<presentation>{For Further Reading}
+    
+%   \begin{thebibliography}{10}
+    
+%   \beamertemplatebookbibitems
+%   % Start with overview books.
+
+%   \bibitem{Author1990}
+%     A.~Author.
+%     \newblock {\em Handbook of Everything}.
+%     \newblock Some Press, 1990.
+ 
+    
+%   \beamertemplatearticlebibitems
+%   % Followed by interesting articles. Keep the list short.
+
+%   \bibitem{Someone2000}
+%     S.~Someone.
+%     \newblock On this and that.
+%     \newblock {\em Journal of This and That}, 2(1):50--100,
+%     2000.
+%   \end{thebibliography}
+% \end{frame}
+
+\end{document}
