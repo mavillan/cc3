@@ -3,7 +3,7 @@ import sympy as sp
 import matplotlib.pyplot as plt
 from scipy import misc
 from scipy.integrate import odeint
-import cPickle
+import pickle
 
 
 def lamb(func):
