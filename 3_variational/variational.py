@@ -111,7 +111,7 @@ F=map(lamb,evEL)
 
 """ Serializing it and storing with Tickle... """
 f=file("sample.pickle","w")
-cPickle.dump(F,f) # Dump F object into f file
+pickle.dump(F,f) # Dump F object into f file
 f.close()
 
 
