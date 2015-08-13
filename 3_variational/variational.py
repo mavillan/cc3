@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 from scipy import misc
 from scipy.integrate import odeint
 import pickle
+import time
 
+t0=time.clock()
 
 def lamb(func):
     return sp.lambdify(c, func, modules='numpy')
@@ -16,13 +18,12 @@ def psi1(x):
 def psi2(x):
 	return np.square(x)
 
-
 """ Taking discrete values of f function """
-fv=misc.imread('/home/martin/Documents/utfsm/CC3/3_variational/Circle-Missing-data-reduced-gray.png').astype(float)
+fv=misc.imread('Circle-Missing-data-reduced-gray.png').astype(float)
 
 
 """ Some constants and parameter values """
-N=10 # Dimensions of image, assuming square form
+N=4 # Dimensions of image, assuming square form
 eps=0.5 #shape Parameters
 alpha=1.
 beta=1.
@@ -82,11 +83,11 @@ for i in range(N):
 	tmpx=xv[i]
 	for j in range(N):
 		tmpy=yv[j]
-		u+=c[10*i+j]*phi.subs(xi,tmpx).subs(yi,tmpy)
-		ux+=c[10*i+j]*phix.subs(xi,tmpx).subs(yi,tmpy)
-		uy+=c[10*i+j]*phiy.subs(xi,tmpx).subs(yi,tmpy)
-		uxx+=c[10*i+j]*phixx.subs(xi,tmpx).subs(yi,tmpy)
-		uyy+=c[10*i+j]*phiyy.subs(xi,tmpx).subs(yi,tmpy)
+		u+=c[N*i+j]*phi.subs(xi,tmpx).subs(yi,tmpy)
+		ux+=c[N*i+j]*phix.subs(xi,tmpx).subs(yi,tmpy)
+		uy+=c[N*i+j]*phiy.subs(xi,tmpx).subs(yi,tmpy)
+		uxx+=c[N*i+j]*phixx.subs(xi,tmpx).subs(yi,tmpy)
+		uyy+=c[N*i+j]*phiyy.subs(xi,tmpx).subs(yi,tmpy)
 		points.append((tmpx,tmpy))
 
 
@@ -102,20 +103,23 @@ EL=Lu-sp.diff(Lux,x)-sp.diff(Luy,y)+sp.diff(Luxx,x,2)+sp.diff(Luyy,y,2)
 """ Evaluating EL equation at domain points [0,1]x[0,1] (falta restar 2f) """
 evEL=[EL.subs(x,points[i][0]).subs(y,points[i][1]) for i in range(N**2)]
 
+#Now we have EL equation evaluated on the domain points (only dependent on ci coef)
+
 
 """ Coneverting into NumPy evaluated functions """
-F=map(lamb,evEL)
+for i in range(N):
+	evEL[i]=sp.lambdify(c,evEL[i],modules='numpy')
 
-# #Now we have EL equation evaluated on the domain points (only dependent on ci coef)
 
 
 """ Serializing it and storing with Tickle... """
-f=file("sample.pickle","w")
-pickle.dump(F,f) # Dump F object into f file
-f.close()
+fobj=open("sample.pickle","wb")
+pickle.dump(evEL,fobj) # Dump F object into fobj file
+fobj.close()
 
+tf=time.clock()
 
-
+print("execution time:",tf-t0)
 
 
 
