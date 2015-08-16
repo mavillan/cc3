@@ -118,7 +118,6 @@ dill.dump(evEL,fobj) # Dump F object into fobj file
 fobj.close()
 
 tf=time.clock()
-# asdf
 
 print("execution time:",tf-t0)
 
