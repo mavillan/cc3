@@ -24,7 +24,7 @@ fv=misc.imread('Circle-Missing-data-reduced-gray.png').astype(float)
 
 
 """ Some constants and parameter values """
-N=4 # Dimensions of image, assuming square form
+N=2 # Dimensions of image, assuming square form
 eps=np.float(0.5) #shape Parameters
 alpha=np.float(1.)
 beta=np.float(1.)	
