@@ -3,7 +3,9 @@ import sympy as sp
 import matplotlib.pyplot as plt
 from scipy import misc
 from scipy.integrate import odeint
+import pickle
 import dill
+import cloudpickle
 import time
 
 t0=time.clock()
@@ -23,10 +25,10 @@ fv=misc.imread('Circle-Missing-data-reduced-gray.png').astype(float)
 
 
 """ Some constants and parameter values """
-N=4 # Dimensions of image, assuming square form
-eps=0.5 #shape Parameters
-alpha=1.
-beta=1.
+N=2 # Dimensions of image, assuming square form
+eps=np.float(0.5) #shape Parameters
+alpha=np.float(1.)
+beta=np.float(1.)	
 
 
 """ Defining Lagrangian funtion L(x,y,u,ux,uy,uxx,uxy,uyy) and calculating it's derivatives """
@@ -113,14 +115,13 @@ for i in range(N):
 
 
 """ Serializing it and storing with Tickle... """
-fobj=open("sample.dill","wb")
-dill.dump(evEL,fobj) # Dump F object into fobj file
+fobj=open("sample.pickle","wb")
+cloudpickle.dump(evEL,fobj) # Dump F object into fobj file
 fobj.close()
 
 tf=time.clock()
-# asdf
 
-print("execution time:",tf-t0)
+print "execution time:",tf-t0
 
 
 
