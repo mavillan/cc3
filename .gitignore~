@@ -3,5 +3,6 @@
 *.pyc
 *.tar.gz
 *.npy
+*.png
 ~fass/
 topic1/

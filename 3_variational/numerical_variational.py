@@ -2,12 +2,21 @@ import numpy as np
 import sympy as sp
 
 #some constants
-N = 50
-eps = 0.5
+N = 50 #dimensions on image
+R = 3  #radius of gaussians
+
+"""
+EXPLANATION OF EPS CALCULATION
+standar deviation of gaussian: 1/(sqrt(2)*eps)
+distance between pixel centers: 1./N
+condition: 3 sd = R * (1./N)
+"""
+eps = (3.*N)/(np.sqrt(2)*R)
 
 #symbols definition
 x,y = sp.symbols('x y')
 
+""" RBF's whitout compact support """
 #RBF and it's derivatives
 phi = sp.exp(-eps**2.*(x**2+y**2))
 
@@ -34,6 +43,58 @@ phixxxx = sp.diff(phixxx,x).simplify()
 phixxyy = sp.diff(phixxy,y).simplify()
 phiyyxx = sp.diff(phiyyx,x).simplify()
 phiyyyy = sp.diff(phiyyy,y).simplify()
+
+
+# """ RBF's whit compact support """
+# #Heaviside function will be used
+# def heaviside(x,x0):
+# 	return 0.5*(np.sign(x-x0) + 1)
+
+# R0 = 0.05 #radius support
+
+# #RBF and it's derivatives
+# phi = (R0 - sp.sqrt(x**2 + y**2))**2 
+
+# #first order
+# phix = sp.diff(phi,x).simplify() 
+# phiy = sp.diff(phi,y).simplify() 
+
+# #second order
+# phixx = sp.diff(phix,x).simplify() 
+# phixy = sp.diff(phix,y).simplify() 
+# phiyx = sp.diff(phiy,x).simplify() 
+# phiyy = sp.diff(phiy,y).simplify() 
+
+
+# #third order
+# phixxx = sp.diff(phixx,x).simplify() 
+# phixxy = sp.diff(phixx,y).simplify()
+# phiyyx = sp.diff(phiyy,x).simplify() 
+# phiyyy = sp.diff(phiyy,y).simplify() 
+
+
+# #fourth order
+# phixxxx = sp.diff(phixxx,x).simplify() 
+# phixxyy = sp.diff(phixxy,y).simplify()
+# phiyyxx = sp.diff(phiyyx,x).simplify() 
+# phiyyyy = sp.diff(phiyyy,y).simplify()
+
+# #applying heaviside to all
+# phi *= (1 - heaviside(sp.sqrt(x**2+y**2), R0))
+# phix *=  (1 - heaviside(np.sqrt(x**2+y**2), R0))
+# phiy *= (1 - heaviside(np.sqrt(x**2+y**2), R0))
+# phixx *= (1 - heaviside(np.sqrt(x**2+y**2), R0))
+# phixy *= (1 - heaviside(np.sqrt(x**2+y**2), R0))
+# phiyx *= (1 - heaviside(np.sqrt(x**2+y**2), R0))
+# phiyy *= (1 - heaviside(np.sqrt(x**2+y**2), R0))
+# phixxx *= (1 - heaviside(np.sqrt(x**2+y**2), R0))
+# phixxy *= (1 - heaviside(np.sqrt(x**2+y**2), R0))
+# phiyyx *= (1 - heaviside(np.sqrt(x**2+y**2), R0))
+# phiyyy *= (1 - heaviside(np.sqrt(x**2+y**2), R0))
+# phixxxx *= (1 - heaviside(np.sqrt(x**2+y**2), R0))
+# phixxyy *= (1 - heaviside(np.sqrt(x**2+y**2), R0))
+# phiyyxx *= (1 - heaviside(np.sqrt(x**2+y**2), R0))
+# phiyyyy *= (1 - heaviside(np.sqrt(x**2+y**2), R0))
 
 
 #lambdify all previous symbolic expressions
